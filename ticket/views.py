@@ -1,3 +1,5 @@
+import random
+
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.db.models import F
@@ -8,14 +10,39 @@ import os
 import json
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
+from django.http import FileResponse
+
 
 # Create your views here.
 def view(request):
     return render(request, template_name="view.html")
 
 
-@csrf_exempt
-def fileUpload(request):
+def file_scan(request):
+    file_dir = os.path.join(settings.BASE_DIR, settings.MEDIA_ROOT, 'attachment')
+    file_lists = {}
+    last_color = ''
+    for dirpath, dirnames, filenames in os.walk(file_dir):
+        color = ['link-primary', 'link-secondary', 'link-success',
+                 'link-danger', 'link-warning', 'link-info', 'link-dark']
+        select_color = color[random.randint(0, len(color) - 1)]
+        while select_color.__eq__(last_color):
+            select_color = color[random.randint(0, len(color) - 1)]
+            last_color = select_color
+        date = dirpath.split('/')[-1].split('\\')[-1]
+        file_lists[date] = {}
+        for filename in filenames:
+            file_lists[date][os.path.join(date, filename)] = select_color
+    if 'date' in request.GET and 'filename' in request.GET:
+        return render(request, template_name='file_scan.html',
+                      context={'file_lists': file_lists, 'upload_file' : os.path.join(request.GET['date'], request.GET['filename'])})
+    else:
+        return render(request, template_name='file_scan.html', context={'file_lists': file_lists})
+
+
+def file_upload(request):
+    if request.method == 'GET':
+        return render(request, template_name='fileUpload.html')
     file = request.FILES.get('file')  # 获取文件对象，包括文件名文件大小和文件内容
     curttime = time.strftime("%Y%m%d")
     # 规定上传目录
@@ -31,8 +58,8 @@ def fileUpload(request):
         if os.path.exists(os.path.join(upload_url, file_name)):
             name, etx = os.path.splitext(file_name)
             addtime = time.strftime("%Y%m%d%H%M%S")
+            finally_name = file.name
             finally_name = name + "_" + addtime + etx
-            # print(name, etx, finally_name)
         else:
             finally_name = file.name
         # 文件分块上传
@@ -47,4 +74,14 @@ def fileUpload(request):
         response_data['FileName'] = file_name
         response_data['FileUrl'] = file_upload_url
         response_json_data = json.dumps(response_data)  # 转化为Json格式
-        return HttpResponse(response_json_data)
+        return HttpResponseRedirect(reverse("tickets:scan_file_upload") + "?date={}&filename={}".format(curttime, file_name))
+    return HttpResponse("no file found")
+
+
+def download(request, year, name):
+    download_url = os.path.join(settings.MEDIA_ROOT, 'attachment', year, name)
+    file = open(download_url, 'rb')
+    response = FileResponse(file)
+    response['Content-Type'] = 'application/octet-stream'
+    response['Content-Disposition'] = 'attachment;filename="{}"'.format(name)
+    return response

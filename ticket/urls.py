@@ -6,5 +6,7 @@ app_name = "tickets"
 
 urlpatterns = [
     path("", views.view, name="view"),
-    path("fileUploads/", views.fileUpload, name="fileUpload")
+    path("file_scan/", views.file_scan, name="scan_file_upload"),
+    path("file_upload/", views.file_upload, name="file_upload"),
+    path("file_scan/<str:year>/<str:name>", views.download, name='download')
 ]

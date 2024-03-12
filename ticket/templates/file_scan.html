@@ -1,0 +1,30 @@
+<link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet"
+      integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+<script src="/static/bootstrap/js/bootstrap.bundle.js"
+        integrity="sha384-/mhDoLbDldZc3qpsJHpLogda//BVZbgYuw6kof4u2FrCedxOtgRZDTHgHUhOCVim"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<div style="width: 50%; margin: 0 25%">
+    <div class="list-group">
+        {% if upload_file %}
+            <p>
+                本次上传的文件
+                <a href="{{ upload_file }}"
+                   class="link-danger link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ upload_file }}</a>
+            </p>
+        {% endif %}
+        <br>
+        {% for date , filenames in file_lists.items %}
+            {% for filename, color in filenames.items %}
+                <p>
+                    <a href="{{ filename }}"
+                       class="{{ color }} link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ filename }}</a>
+                </p>
+            {% endfor %}
+        {% endfor %}
+
+
+    </div>
+</div>
+
