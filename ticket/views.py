@@ -129,3 +129,8 @@ def process_file(request):
 def progress_show(request):
     print('{} show_progress----------{}'.format(request.GET['file'], num_progress[request.GET['file']]))
     return JsonResponse(num_progress[request.GET['file']], safe=False)
+
+
+
+# CPU 版的 PaddlePaddle https://www.paddlepaddle.org.cn/install/quick?docurl=/documentation/docs/zh/install/pip/windows-pip.html
+# https://blog.csdn.net/weixin_62650212/article/details/132547676 使用paddleOCR批量识别pdf
